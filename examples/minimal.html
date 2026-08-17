@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FTL-Pay — minimal integration</title>
+</head>
+<body>
+
+<!-- 1. Somewhere to put the button. -->
+<div id="ftlpay-button"></div>
+
+<!-- 2. The SDK. -->
+<script src="https://YOUR-FTLPAY-ORIGIN/ftlpay.js"></script>
+
+<!-- 3. Mount it. -->
+<script>
+  // client_secret comes from your OWN server, which created the payment intent with
+  // your secret key. Never create it in the browser — see the README.
+  fetch('/your-server-endpoint-that-creates-the-intent', { method: 'POST' })
+    .then(function (r) { return r.json(); })
+    .then(function (session) {
+      FTLPay.mountButton('#ftlpay-button', {
+        publishableKey: session.publishable_key,
+        clientSecret: session.client_secret,
+        returnUrl: location.href // optional — where the customer lands after paying
+      });
+    });
+</script>
+
+</body>
+</html>
