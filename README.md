@@ -1,13 +1,14 @@
 # FTL-Pay
 
-*Faster-than-light payments.* Add mobile-money checkout to your site with one container
-div, one script tag, and one function call.
+*Faster-than-light payments.* Install it like a widget: one `<div>`, one `<script>` tag.
+No JavaScript to write, no build step, no dependency.
 
 ![Pay with FTL-Pay](assets/button-preview.png)
 
 ## The whole integration
 
-**On your server**, with your secret key (never in the browser):
+**On your server**, with your secret key (never in the browser), when you already know
+the order total:
 
 ```bash
 curl -X POST https://YOUR-FTLPAY-ORIGIN/v1/payment_intents \
@@ -17,30 +18,38 @@ curl -X POST https://YOUR-FTLPAY-ORIGIN/v1/payment_intents \
 ```
 
 `amount` is integer minor units — `5100` is $51.00. The response has a `client_secret`.
-Hand it to your page (however you already get server data into your frontend).
+This is the one step that can't be skipped — it's what stops a customer setting their own
+price — but it's the only server-side code this integration needs.
 
-**On your page:**
+**On your page**, render that `client_secret` into these attributes the same way you
+already render the order total into the page:
 
 ```html
-<div id="ftlpay-button"></div>
+<div data-ftlpay-button
+     data-publishable-key="pk_test_..."
+     data-client-secret="<from your server, above>"
+     data-return-url="https://yoursite.example/thank-you"></div>
 <script src="https://YOUR-FTLPAY-ORIGIN/ftlpay.js"></script>
-<script>
-  FTLPay.mountButton('#ftlpay-button', {
-    publishableKey: 'pk_test_...',
-    clientSecret: '<from your server, above>',
-    returnUrl: location.href // optional
-  });
-</script>
 ```
 
-That's it. FTL-Pay renders its own button — black, the wordmark, nothing for you to
-style. Clicking it is a real top-level navigation to FTL-Pay's own hosted page, where the
-phone number, provider selection, wallet verification, and payment instructions all
-happen. Your page never touches a wallet number and never decides a payment succeeded.
+That's the whole thing. No `<script>` block, no function call — the button finds its own
+`data-ftlpay-button` div and mounts itself. FTL-Pay renders it: black, the wordmark,
+nothing for you to style. Clicking it is a real top-level navigation to FTL-Pay's own
+hosted page, where the phone number, provider selection, wallet verification, and payment
+instructions all happen. Your page never touches a wallet number and never decides a
+payment succeeded.
 
-A full working example is in [`examples/minimal.html`](examples/minimal.html). The SDK
-itself is [`ftlpay.js`](ftlpay.js) — read it, it's about 130 lines and does exactly what
-this README says and nothing else.
+Building the page with JavaScript instead of a server template — a single-page app, a
+button that appears after a `fetch`? Call `FTLPay.mountButton('#selector', options)`
+directly; it's the same button, the imperative way. `FTLPay.scanForButtons()` re-scans
+the DOM for `data-ftlpay-button` elements if you inject markup after the page has already
+loaded.
+
+Two full working examples: [`examples/zero-js.html`](examples/zero-js.html) (the
+attribute-only version above) and [`examples/minimal.html`](examples/minimal.html) (the
+JS-driven version, for a single-page app creating the order after load). The SDK itself
+is [`ftlpay.js`](ftlpay.js) — read it, it's about 150 lines and does exactly what this
+README says and nothing else.
 
 ## What your customers actually see
 

@@ -1,24 +1,25 @@
 /**
  * FTL-Pay drop-in checkout.
  *
- *   <div id="ftlpay-button"></div>
- *   <script src="https://pay.ftlpay.example/ftlpay.js"></script>
- *   <script>
- *     FTLPay.mountButton('#ftlpay-button', {
- *       publishableKey: 'pk_test_...',
- *       clientSecret: '<from your server>',
- *       returnUrl: location.href  // optional — where the customer lands after paying
- *     });
- *   </script>
+ * Install and go — no JavaScript required. Your server creates the payment intent
+ * (that part can't be skipped: it's what stops anyone setting their own price) and
+ * renders its client_secret into the page, same as it already renders the order total:
  *
- * That's the whole integration. Clicking the button takes the customer to FTL-Pay's own
+ *   <div data-ftlpay-button
+ *        data-publishable-key="pk_test_..."
+ *        data-client-secret="<from your server>"
+ *        data-return-url="https://yoursite.example/thank-you"></div>
+ *   <script src="https://pay.ftlpay.example/ftlpay.js"></script>
+ *
+ * That's it — the button renders itself. Clicking it takes the customer to FTL-Pay's own
  * hosted page — the phone number, provider selection, verification, and payment
  * instructions all happen there, on FTL-Pay's domain, never inside your page. Your site
  * never touches a wallet number and never decides a payment succeeded; it only ever sees
  * the customer again after FTL-Pay sends them back.
  *
- * If you want your own button instead of the provided one, call
- * `FTLPay.redirectToCheckout(options)` directly from whatever element you like.
+ * Building the page with JS instead of a template? `FTLPay.mountButton(target, options)`
+ * does the same thing programmatically. Want your own button instead of the provided
+ * one? Call `FTLPay.redirectToCheckout(options)` from whatever element you build.
  *
  * Fulfil on the webhook, not on the return — a customer can close the tab, lose signal,
  * or bookmark the return URL and revisit it later. `payment.completed` is the authority.
@@ -102,7 +103,45 @@
     return button;
   }
 
-  var FTLPay = { redirectToCheckout: redirectToCheckout, mountButton: mountButton, origin: ORIGIN };
+  /**
+   * The zero-JS path: find every element declaring itself a button via
+   * `data-ftlpay-button` and mount one into it from its own data attributes. Runs once
+   * on load and is safe to call again — already-mounted elements are skipped — so a
+   * page that swaps in new markup after an XHR/fetch can just call
+   * `FTLPay.scanForButtons()` rather than tracking which nodes are new itself.
+   */
+  function scanForButtons(root) {
+    var scope = root || document;
+    var nodes = scope.querySelectorAll('[data-ftlpay-button]:not([data-ftlpay-mounted])');
+    for (var i = 0; i < nodes.length; i += 1) {
+      var el = nodes[i];
+      var publishableKey = el.getAttribute('data-publishable-key');
+      var clientSecret = el.getAttribute('data-client-secret');
+      if (!publishableKey || !clientSecret) continue; // not ready yet — leave it for a later scan
+      mountButton(el, {
+        publishableKey: publishableKey,
+        clientSecret: clientSecret,
+        returnUrl: el.getAttribute('data-return-url') || undefined,
+      });
+      el.setAttribute('data-ftlpay-mounted', 'true');
+    }
+  }
+
+  function autoScan() {
+    scanForButtons(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoScan);
+  } else {
+    autoScan();
+  }
+
+  var FTLPay = {
+    redirectToCheckout: redirectToCheckout,
+    mountButton: mountButton,
+    scanForButtons: scanForButtons,
+    origin: ORIGIN,
+  };
   window.FTLPay = FTLPay;
   // Back-compat for integrations written against the pre-rename global.
   window.SafeVerify = FTLPay;

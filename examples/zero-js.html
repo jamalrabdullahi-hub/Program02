@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FTL-Pay — zero-JS integration</title>
+</head>
+<body>
+
+<!--
+  The whole integration. No <script> block, no FTLPay.mountButton() call — the button
+  mounts itself from these attributes when ftlpay.js loads.
+
+  publishable-key and return-url can be static. client-secret can't: it comes from your
+  server creating a payment intent with your secret key (see the main README), so this
+  div's attributes need to be templated with real, per-order values by whatever renders
+  your page — the same way you already template the order total. Hardcoding a real
+  client_secret into a static file only works for that one order, once.
+-->
+<div data-ftlpay-button
+     data-publishable-key="pk_test_..."
+     data-client-secret="<rendered by your server, per order>"
+     data-return-url="https://yoursite.example/thank-you">
+</div>
+
+<script src="https://YOUR-FTLPAY-ORIGIN/ftlpay.js"></script>
+
+</body>
+</html>
