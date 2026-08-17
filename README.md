@@ -42,6 +42,16 @@ A full working example is in [`examples/minimal.html`](examples/minimal.html). T
 itself is [`ftlpay.js`](ftlpay.js) — read it, it's about 130 lines and does exactly what
 this README says and nothing else.
 
+## What your customers actually see
+
+[`hosted-checkout/checkout.html`](hosted-checkout/checkout.html) is the real page — not a
+mockup — that FTL-Pay serves at `/checkout` and that `mountButton`/`redirectToCheckout`
+send your customer to. You don't host it or deploy it; it's here so you can read exactly
+what your customers experience before you send anyone to it: the phone number field, the
+provider picker, the verify-or-pay decision, the payment-window countdown, the confirm
+step before real money moves. Nothing in it talks to anything but FTL-Pay's own API —
+your site is never in the loop while it's on screen.
+
 ## The three things you must get right
 
 **1. Create the payment intent on your server, never in the browser.**
@@ -109,6 +119,7 @@ at every FTL-Pay merchant.
 
 ---
 
-This repo is intentionally small: the client-side integration surface, nothing else. It
-doesn't include the backend, the admin console, or anything else you'd need to run
-FTL-Pay yourself — talk to us about that.
+This repo is intentionally small: the client-side integration surface and the actual
+checkout page your customers see, nothing else. It doesn't include the backend, the
+admin console, or anything else you'd need to run FTL-Pay yourself — talk to us about
+that.
