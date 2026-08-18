@@ -1,17 +1,27 @@
 /**
  * FTL-Pay drop-in checkout.
  *
- * Install and go — no JavaScript required. Your server creates the payment intent
- * (that part can't be skipped: it's what stops anyone setting their own price) and
- * renders its client_secret into the page, same as it already renders the order total:
+ * Grab it straight from GitHub — no npm install, no build step, no self-hosting the
+ * file yourself. This exact script is CDN-served by jsDelivr for free off the public
+ * repo: https://cdn.jsdelivr.net/gh/<org>/<repo>@<tag>/ftlpay.js (pin a released tag
+ * rather than @main in anything you'd call production — @main tracks the branch and can
+ * change under you).
+ *
+ * Because the file can now be loaded from a CDN that isn't your FTL-Pay backend, the
+ * script tag needs to say where that backend actually is, via `data-origin` — the button
+ * still has to send your customer to *your* checkout, not to jsDelivr:
  *
  *   <div data-ftlpay-button
  *        data-publishable-key="pk_test_..."
  *        data-client-secret="<from your server>"
  *        data-return-url="https://yoursite.example/thank-you"></div>
- *   <script src="https://pay.ftlpay.example/ftlpay.js"></script>
+ *   <script src="https://cdn.jsdelivr.net/gh/<org>/<repo>@<tag>/ftlpay.js"
+ *           data-origin="https://pay.yourcompany.example"></script>
  *
- * That's it — the button renders itself. Clicking it takes the customer to FTL-Pay's own
+ * Self-hosting ftlpay.js from your own FTL-Pay server instead? Drop `data-origin` — it
+ * falls back to wherever the script file itself was loaded from, same origin as before.
+ *
+ * That's the whole integration. Clicking the button takes the customer to FTL-Pay's own
  * hosted page — the phone number, provider selection, verification, and payment
  * instructions all happen there, on FTL-Pay's domain, never inside your page. Your site
  * never touches a wallet number and never decides a payment succeeded; it only ever sees
@@ -28,7 +38,10 @@
   'use strict';
 
   var ORIGIN = (function () {
-    var current = document.currentScript && document.currentScript.src;
+    var script = document.currentScript;
+    var explicit = script && script.getAttribute('data-origin');
+    if (explicit) return explicit.replace(/\/+$/, '');
+    var current = script && script.src;
     if (!current) return window.location.origin;
     var url = new URL(current, window.location.href);
     return url.origin;

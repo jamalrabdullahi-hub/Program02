@@ -15,6 +15,11 @@
   div's attributes need to be templated with real, per-order values by whatever renders
   your page — the same way you already template the order total. Hardcoding a real
   client_secret into a static file only works for that one order, once.
+
+  The script tag below is loaded straight from this repo via jsDelivr's GitHub CDN — pin
+  a real tag in production rather than @main, which tracks the branch. data-origin tells
+  it where your actual FTL-Pay backend lives, since the script file itself now comes from
+  jsDelivr, not from you.
 -->
 <div data-ftlpay-button
      data-publishable-key="pk_test_..."
@@ -22,7 +27,8 @@
      data-return-url="https://yoursite.example/thank-you">
 </div>
 
-<script src="https://YOUR-FTLPAY-ORIGIN/ftlpay.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/jamalrabdullahi-hub/Program02@v0.1.0/ftlpay.js"
+        data-origin="https://YOUR-FTLPAY-ORIGIN"></script>
 
 </body>
 </html>

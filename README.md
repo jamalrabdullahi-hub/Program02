@@ -1,9 +1,23 @@
 # FTL-Pay
 
-*Faster-than-light payments.* Install it like a widget: one `<div>`, one `<script>` tag.
-No JavaScript to write, no build step, no dependency.
+*Faster-than-light payments.* Install it like a widget straight from this GitHub repo:
+one `<div>`, one `<script>` tag pointed at this repo's own files. No npm install, no
+build step, nothing to download and vendor into your project.
 
 ![Pay with FTL-Pay](assets/button-preview.png)
+
+## Get it from GitHub — literally
+
+This repo is public, which means [jsDelivr](https://www.jsdelivr.com/) CDN-serves its
+files for free with no publish step on our end:
+
+```
+https://cdn.jsdelivr.net/gh/jamalrabdullahi-hub/Program02@v0.1.0/ftlpay.js
+```
+
+Pin a released tag (`@v0.1.0`, above) rather than `@main` in anything you'd call
+production — `@main` tracks this branch and can change under you; a tag never does.
+Check the [tags](../../tags) for the latest.
 
 ## The whole integration
 
@@ -29,15 +43,21 @@ already render the order total into the page:
      data-publishable-key="pk_test_..."
      data-client-secret="<from your server, above>"
      data-return-url="https://yoursite.example/thank-you"></div>
-<script src="https://YOUR-FTLPAY-ORIGIN/ftlpay.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/jamalrabdullahi-hub/Program02@v0.1.0/ftlpay.js"
+        data-origin="https://YOUR-FTLPAY-ORIGIN"></script>
 ```
 
-That's the whole thing. No `<script>` block, no function call — the button finds its own
-`data-ftlpay-button` div and mounts itself. FTL-Pay renders it: black, the wordmark,
-nothing for you to style. Clicking it is a real top-level navigation to FTL-Pay's own
-hosted page, where the phone number, provider selection, wallet verification, and payment
-instructions all happen. Your page never touches a wallet number and never decides a
-payment succeeded.
+That's the whole thing. No JavaScript to write, no function call — the button finds its
+own `data-ftlpay-button` div and mounts itself. `data-origin` on the script tag is what
+tells it where *your* FTL-Pay backend actually lives, since the file itself is now
+loaded from jsDelivr rather than from you — see [`ftlpay.js`](ftlpay.js)'s own comment
+block for the self-hosted alternative (drop `data-origin`, it falls back to wherever the
+script file was loaded from).
+
+FTL-Pay renders the button itself: black, the wordmark, nothing for you to style.
+Clicking it is a real top-level navigation to FTL-Pay's own hosted page, where the phone
+number, provider selection, wallet verification, and payment instructions all happen.
+Your page never touches a wallet number and never decides a payment succeeded.
 
 Building the page with JavaScript instead of a server template — a single-page app, a
 button that appears after a `fetch`? Call `FTLPay.mountButton('#selector', options)`
